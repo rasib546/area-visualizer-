@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Imagination</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 p-6 md:p-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-16">
+                <div class="inline-block mb-4 px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold tracking-widest rounded">
+                    SPATIAL REASONING
+                </div>
+                <h1 class="text-5xl md:text-6xl font-black text-stone-900 mb-4">
+                    Area Imagination
+                </h1>
+                <p class="text-lg text-stone-600 max-w-2xl leading-relaxed">
+                    Visualize space sizes instantly. Enter an area and see it scaled against real rooms, courts, and buildings.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-stone-200 p-8">
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">
+                        Area Size
+                    </label>
+                    <input
+                        type="number"
+                        id="inputArea"
+                        value="500"
+                        class="w-full text-5xl font-black text-stone-900 bg-transparent focus:outline-none"
+                        min="1"
+                    />
+                    <div class="mt-4 pt-4 border-t border-stone-100 text-sm text-stone-600">
+                        <span class="font-semibold text-stone-900" id="totalArea">500</span> sq ft total
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8">
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">
+                        Unit
+                    </label>
+                    <select
+                        id="unitSelect"
+                        class="w-full text-lg font-semibold text-stone-900 bg-transparent focus:outline-none"
+                    >
+                        <option value="sqft">Square Feet</option>
+                        <option value="sqm">Square Meters</option>
+                        <option value="sqyd">Square Yards</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-16">
+                <h2 class="text-2xl font-bold text-stone-900 mb-8">How it compares to real spaces</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="comparisonsContainer">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-stone-900 to-stone-800 rounded-xl p-8 text-stone-100 mb-8">
+                <h3 class="text-xl font-bold mb-6">Context for reference</h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div>
+                        <p class="text-sm opacity-75 mb-2">Average US Apartment</p>
+                        <p class="text-3xl font-black">950 sq ft</p>
+                    </div>
+                    <div>
+                        <p class="text-sm opacity-75 mb-2">Average US House</p>
+                        <p class="text-3xl font-black">2,300 sq ft</p>
+                    </div>
+                    <div>
+                        <p class="text-sm opacity-75 mb-2">Tiny Home</p>
+                        <p class="text-3xl font-black">100–400 sq ft</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-sm text-stone-600">
+                <p>Update the input above to explore different area sizes in real-time</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const references = [
+            { name: 'Parking Space', sqft: 180, image: '#d4a574' },
+            { name: 'Bedroom', sqft: 200, image: '#e8d5c4' },
+            { name: 'Kitchen', sqft: 220, image: '#f5e6d3' },
+            { name: 'Studio Apartment', sqft: 400, image: '#e8dcc8' },
+            { name: 'Tennis Court', sqft: 2808, image: '#7ba876' },
+            { name: 'Basketball Court', sqft: 4700, image: '#8b7a6b' },
+        ];
+
+        const inputArea = document.getElementById('inputArea');
+        const unitSelect = document.getElementById('unitSelect');
+        const totalArea = document.getElementById('totalArea');
+        const container = document.getElementById('comparisonsContainer');
+
+        function updateComparisons() {
+            const area = parseFloat(inputArea.value) || 0;
+            const unit = unitSelect.value;
+            const conversions = { sqft: 1, sqm: 10.764, sqyd: 9 };
+            const areaInSqft = area * conversions[unit];
+
+            totalArea.textContent = areaInSqft.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+            const maxSquare = Math.max(areaInSqft, ...references.map(r => r.sqft));
+
+            container.innerHTML = references
+                .sort((a, b) => a.sqft - b.sqft)
+                .map((item, idx) => {
+                    const ratio = areaInSqft / item.sqft;
+                    const times = ratio.toFixed(1);
+                    const isSmaller = ratio < 1;
+                    const percentage = Math.min((item.sqft / maxSquare) * 100, 100);
+
+                    return `
+                        <div class="group rounded-xl overflow-hidden shadow-sm border border-stone-200 transition-all duration-300 hover:shadow-md">
+                            <div style="background: ${item.image}" class="h-32 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                            </div>
+                            <div class="bg-white p-6">
+                                <h3 class="font-bold text-lg text-stone-900 mb-1">${item.name}</h3>
+                                <p class="text-sm text-stone-600 mb-4">${item.sqft.toLocaleString()} sq ft</p>
+                                <div class="space-y-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">
+                                            Your space is <span class="text-orange-600">${times}× ${isSmaller ? 'smaller' : 'larger'}</span>
+                                        </p>
+                                        <div class="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
+                                            <div
+                                                class="h-full bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-500"
+                                                style="width: ${percentage}%"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                })
+                .join('');
+        }
+
+        inputArea.addEventListener('input', updateComparisons);
+        unitSelect.addEventListener('change', updateComparisons);
+
+        updateComparisons();
+    </script>
+</body>
+</html>
